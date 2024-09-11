@@ -1,6 +1,6 @@
 # FreshCart
 
-FreshCart is a grocery app that keeps track of what's in your fridge.
+FreshCart is a grocery app in Flutter that keeps track of what's in your fridge.
 Just start by taking a picture of your shopping cart. If the app misses anything, you can take another picture or add items to the list manually.
 
 ## Recently Added
