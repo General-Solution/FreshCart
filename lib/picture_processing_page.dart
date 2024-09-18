@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:tflite_v2/tflite_v2.dart';
+import 'dart:io';
+import 'dart:ui';
 
-class PictureProcessingPage extends StatelessWidget {
+class PictureProcessingPage extends StatefulWidget {
   const PictureProcessingPage(
-      {super.key, required this.title, required this.image});
+      {super.key, required this.title, required this.imageFile});
   final String title;
-  final Image image;
+  final File imageFile;
+
+  @override
+  State<PictureProcessingPage> createState() => _PictureProcessingPageState();
+}
+
+class _PictureProcessingPageState extends State<PictureProcessingPage> {
+  @override
+  void initState() {
+    super.initState();
+    processImage(widget.imageFile); // getting prefs etc.
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +26,7 @@ class PictureProcessingPage extends StatelessWidget {
       body: Center(
         child: Stack(
           children: [
-            image,
+            Center(child: Image.file(widget.imageFile)),
             Center(
               child: Container(
                 width: 200.0,
@@ -37,3 +51,17 @@ class PictureProcessingPage extends StatelessWidget {
     );
   }
 }
+
+Future<void> processImage(File image) async {
+    print('Analysing Image');
+    var file = image.toString();
+    var recognitions = await Tflite.detectObjectOnImage(
+      path: file,       // required
+      model: "YOLO",      
+      imageMean: 0.0,       
+      imageStd: 255.0,      
+      threshold: 0.3,       // defaults to 0.1
+      asynch: true          // defaults to true
+    );
+    print(recognitions);
+  }

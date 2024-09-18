@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'picture_processing_page.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 class PicturePage extends StatefulWidget {
@@ -73,15 +74,16 @@ class AddPicture extends StatelessWidget {
 Future _pickImageFromSource({required ImageSource source, required BuildContext context}) async {
   final navigator = Navigator.of(context);
   final pickedFile = await ImagePicker().pickImage(source: source);
-  final Image image;
   if (pickedFile != null){
     if (kIsWeb) {
-      image = Image.network(pickedFile.path);
-    } else {
-      image = Image.file(File(pickedFile.path));
+      print("Picture analysis not yet available on web.");
     }
+    final tempDir = await getTemporaryDirectory();
+    File imageFile = File('${tempDir.path}/sth.jpg');
+    final bytes = await pickedFile.readAsBytes();
+    await imageFile.writeAsBytes(bytes);
     navigator.push(
-      MaterialPageRoute(builder: (context) => PictureProcessingPage(title: "Picture Processing Page", image: image)),
+      MaterialPageRoute(builder: (context) => PictureProcessingPage(title: "Picture Processing Page", imageFile: imageFile)),
     );
   }
 }

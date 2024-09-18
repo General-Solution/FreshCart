@@ -9,3 +9,6 @@ build/
 .flutter-plugins
 
 analysis_options.yaml
+
+model/
+*.tflite

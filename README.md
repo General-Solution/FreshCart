@@ -5,12 +5,13 @@ Just start by taking a picture of your shopping cart. If the app misses anything
 
 ## Recently Added
 
-* Nothing. This is a completely new repository
+* Created basic UI layout and user flow.
+* Added image processing to project. Has not yet been integrated with UI.
 
 ## Upcoming Features:
 
 * Take or upload pictures and add them to the app.
-* Add
+* Manually add grocery items that the Object Recognition missed.
 * FreshCart will remember what you bought and what's in the fridge.
 * See at a glance what's close to expiring.
 * Ask the meal planner for ideas of what to cook.
