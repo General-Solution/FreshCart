@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:tflite_v2/tflite_v2.dart';
+import 'package:tflite_web/tflite_web.dart';
 import 'dart:io';
 import 'dart:ui';
+import 'dart:ui_web';
+import 'package:image/image.dart' as img;
 
 class PictureProcessingPage extends StatefulWidget {
   const PictureProcessingPage(
       {super.key, required this.title, required this.imageFile});
   final String title;
-  final File imageFile;
+  final XFile imageFile;
 
   @override
   State<PictureProcessingPage> createState() => _PictureProcessingPageState();
@@ -26,7 +30,7 @@ class _PictureProcessingPageState extends State<PictureProcessingPage> {
       body: Center(
         child: Stack(
           children: [
-            Center(child: Image.file(widget.imageFile)),
+            Center(child: Image.network(widget.imageFile.path)),
             Center(
               child: Container(
                 width: 200.0,
@@ -52,16 +56,48 @@ class _PictureProcessingPageState extends State<PictureProcessingPage> {
   }
 }
 
-Future<void> processImage(File image) async {
-    print('Analysing Image');
-    var file = image.toString();
-    var recognitions = await Tflite.detectObjectOnImage(
-      path: file,       // required
-      model: "YOLO",      
-      imageMean: 0.0,       
-      imageStd: 255.0,      
-      threshold: 0.3,       // defaults to 0.1
-      asynch: true          // defaults to true
+Future<void> processImage(XFile imageFile) async {
+    print('Initializing tflite-web');
+    await TFLiteWeb.initialize();
+    print('Loading Model');
+    final loadedModel = await TFLiteModel.fromUrl('../lib/assets/nn_model.tflite');
+    print('Model Loaded');
+    print('Analyzing Image');
+    final imageData = await imageFile.readAsBytes();
+    final image = img.decodeImage(imageData);
+    final imageInput = img.copyResize(
+      image!,
+      width: 300,
+      height: 300,
     );
-    print(recognitions);
+    final imageMatrix = List.generate(
+      imageInput.height,
+      (y) => List.generate(
+        imageInput.width,
+        (x) {
+          final pixel = imageInput.getPixel(x, y);
+          return [pixel.r, pixel.g, pixel.b];
+        },
+      ),
+    );
+    final output = _runInference(imageMatrix, loadedModel);
+  }
+
+List<List<Object>> _runInference(
+    List<List<List<num>>> imageMatrix,
+    TFLiteModel loadedModel, 
+  ) {
+    print('Running inference...');
+
+    // Set input tensor [1, 300, 300, 3]
+    
+    final input = createTensor(
+      imageMatrix,
+      shape: [300, 300, 3],
+      type: TFLiteDataType.int32,
+    );
+
+    final output = loadedModel.predict(input);
+    print(output);
+    return output.values.toList();
   }
